@@ -27,8 +27,8 @@ vars:
   NODE_MODULES_DIR: '{{.ROOT_DIR}}/node_modules/.bin'
   REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
 
-  OPEN_API_USER_PROFILE_V1_BASE: '{{.ROOT_DIR}}/shared/api/user_profile/v1/user_profile.openapi.yaml'
-  OPEN_API_USER_PROFILE_V1_BUNDLE: '{{.ROOT_DIR}}/shared/api/bundles/user_profile.openapi.v1.bundle.yaml'
+  OPEN_API_STUDY_MATERIALS_V1_BASE: '{{.ROOT_DIR}}/shared/api/study_materials/v1/study_materials.openapi.yaml'
+  OPEN_API_STUDY_MATERIALS_V1_BUNDLE: '{{.ROOT_DIR}}/shared/api/bundles/study_materials.openapi.v1.bundle.yaml'
 
   OPEN_API_FILES: '{{.ROOT_DIR}}/shared/api/bundles'
 
@@ -185,7 +185,7 @@ tasks:
     desc: Собрать OpenAPI в один файл через локальный redocly
     deps: [ redocly-cli:install ]
     cmds:
-      - '{{.REDOCLY}} bundle {{.OPEN_API_USER_PROFILE_V1_BASE}} -o {{.OPEN_API_USER_PROFILE_V1_BUNDLE}}'
+      - '{{.REDOCLY}} bundle {{.OPEN_API_STUDY_MATERIALS_V1_BASE}} -o {{.OPEN_API_STUDY_MATERIALS_V1_BUNDLE}}'
 
   redocly-cli:bundle:
     desc: Собрать все схемы OpenAPI в общие файлы через локальный redocly

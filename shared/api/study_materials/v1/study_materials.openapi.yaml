@@ -4,8 +4,8 @@ info:
   version: 1.0.0
   description: API для работы с данными о погоде
 x-ogen:
-  target: ./shared/pkg/openapi/user_profile/v1
-  package: user_profile_v1
+  target: ./shared/pkg/openapi/study_materials/v1
+  package: study_materials_v1
   clean: true
 
 tags:
