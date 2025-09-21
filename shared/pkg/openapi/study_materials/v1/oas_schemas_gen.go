@@ -39,8 +39,36 @@ func (s *BadRequestError) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*BadRequestError) getWeatherByCityRes()    {}
-func (*BadRequestError) updateWeatherByCityRes() {}
+func (*BadRequestError) createPlanRes()  {}
+func (*BadRequestError) getPlanByIDRes() {}
+
+// Ref: #/components/schemas/create_plan_request
+type CreatePlanRequest struct {
+	// Название файла.
+	Title string `json:"title"`
+	// URL для скачивания файла.
+	FileURL string `json:"file_url"`
+}
+
+// GetTitle returns the value of Title.
+func (s *CreatePlanRequest) GetTitle() string {
+	return s.Title
+}
+
+// GetFileURL returns the value of FileURL.
+func (s *CreatePlanRequest) GetFileURL() string {
+	return s.FileURL
+}
+
+// SetTitle sets the value of Title.
+func (s *CreatePlanRequest) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetFileURL sets the value of FileURL.
+func (s *CreatePlanRequest) SetFileURL(val string) {
+	s.FileURL = val
+}
 
 // Ref: #/components/schemas/generic_error
 type GenericError struct {
@@ -124,8 +152,8 @@ func (s *InternalServerError) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*InternalServerError) getWeatherByCityRes()    {}
-func (*InternalServerError) updateWeatherByCityRes() {}
+func (*InternalServerError) createPlanRes()  {}
+func (*InternalServerError) getPlanByIDRes() {}
 
 // Ref: #/components/schemas/not_found_error
 type NotFoundError struct {
@@ -155,7 +183,53 @@ func (s *NotFoundError) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*NotFoundError) getWeatherByCityRes() {}
+func (*NotFoundError) getPlanByIDRes() {}
+
+// NewOptDateTime returns new OptDateTime with value set to v.
+func NewOptDateTime(v time.Time) OptDateTime {
+	return OptDateTime{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDateTime is optional time.Time.
+type OptDateTime struct {
+	Value time.Time
+	Set   bool
+}
+
+// IsSet returns true if OptDateTime was set.
+func (o OptDateTime) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDateTime) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDateTime) SetTo(v time.Time) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDateTime) Get() (v time.Time, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDateTime) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptInt returns new OptInt with value set to v.
 func NewOptInt(v int) OptInt {
@@ -197,6 +271,52 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptInt64 returns new OptInt64 with value set to v.
+func NewOptInt64(v int64) OptInt64 {
+	return OptInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt64 is optional int64.
+type OptInt64 struct {
+	Value int64
+	Set   bool
+}
+
+// IsSet returns true if OptInt64 was set.
+func (o OptInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt64) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt64) Get() (v int64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt64) Or(d int64) int64 {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -249,61 +369,81 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
-// Ref: #/components/schemas/update_weather_request
-type UpdateWeatherRequest struct {
-	// Температура в градусах Цельсия.
-	Temperature float32 `json:"temperature"`
+// Ref: #/components/schemas/plan_obj
+type PlanObj struct {
+	// Идентификатор файла.
+	ID OptInt64 `json:"id"`
+	// Название файла.
+	Title string `json:"title"`
+	// Время создания файла.
+	CreatedAt time.Time `json:"created_at"`
+	// Время последнего обновления файла.
+	UpdatedAt OptDateTime `json:"updated_at"`
+	// URL для скачивания файла.
+	FileURL OptString `json:"file_url"`
+	// Размер файла в байтах.
+	FileSize OptInt64 `json:"file_size"`
 }
 
-// GetTemperature returns the value of Temperature.
-func (s *UpdateWeatherRequest) GetTemperature() float32 {
-	return s.Temperature
+// GetID returns the value of ID.
+func (s *PlanObj) GetID() OptInt64 {
+	return s.ID
 }
 
-// SetTemperature sets the value of Temperature.
-func (s *UpdateWeatherRequest) SetTemperature(val float32) {
-	s.Temperature = val
+// GetTitle returns the value of Title.
+func (s *PlanObj) GetTitle() string {
+	return s.Title
 }
 
-// Ref: #/components/schemas/weather
-type Weather struct {
-	// Название города.
-	City string `json:"city"`
-	// Температура в градусах Цельсия.
-	Temperature float32 `json:"temperature"`
-	// Время последнего обновления данных.
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-// GetCity returns the value of City.
-func (s *Weather) GetCity() string {
-	return s.City
-}
-
-// GetTemperature returns the value of Temperature.
-func (s *Weather) GetTemperature() float32 {
-	return s.Temperature
+// GetCreatedAt returns the value of CreatedAt.
+func (s *PlanObj) GetCreatedAt() time.Time {
+	return s.CreatedAt
 }
 
 // GetUpdatedAt returns the value of UpdatedAt.
-func (s *Weather) GetUpdatedAt() time.Time {
+func (s *PlanObj) GetUpdatedAt() OptDateTime {
 	return s.UpdatedAt
 }
 
-// SetCity sets the value of City.
-func (s *Weather) SetCity(val string) {
-	s.City = val
+// GetFileURL returns the value of FileURL.
+func (s *PlanObj) GetFileURL() OptString {
+	return s.FileURL
 }
 
-// SetTemperature sets the value of Temperature.
-func (s *Weather) SetTemperature(val float32) {
-	s.Temperature = val
+// GetFileSize returns the value of FileSize.
+func (s *PlanObj) GetFileSize() OptInt64 {
+	return s.FileSize
+}
+
+// SetID sets the value of ID.
+func (s *PlanObj) SetID(val OptInt64) {
+	s.ID = val
+}
+
+// SetTitle sets the value of Title.
+func (s *PlanObj) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *PlanObj) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
 }
 
 // SetUpdatedAt sets the value of UpdatedAt.
-func (s *Weather) SetUpdatedAt(val time.Time) {
+func (s *PlanObj) SetUpdatedAt(val OptDateTime) {
 	s.UpdatedAt = val
 }
 
-func (*Weather) getWeatherByCityRes()    {}
-func (*Weather) updateWeatherByCityRes() {}
+// SetFileURL sets the value of FileURL.
+func (s *PlanObj) SetFileURL(val OptString) {
+	s.FileURL = val
+}
+
+// SetFileSize sets the value of FileSize.
+func (s *PlanObj) SetFileSize(val OptInt64) {
+	s.FileSize = val
+}
+
+func (*PlanObj) createPlanRes()  {}
+func (*PlanObj) getPlanByIDRes() {}

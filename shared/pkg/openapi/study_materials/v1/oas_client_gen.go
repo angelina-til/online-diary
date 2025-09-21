@@ -9,15 +9,16 @@ import (
 	"time"
 
 	"github.com/go-faster/errors"
-	"github.com/ogen-go/ogen/conv"
-	ht "github.com/ogen-go/ogen/http"
-	"github.com/ogen-go/ogen/otelogen"
-	"github.com/ogen-go/ogen/uri"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/ogen-go/ogen/conv"
+	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/otelogen"
+	"github.com/ogen-go/ogen/uri"
 )
 
 func trimTrailingSlashes(u *url.URL) {
@@ -27,18 +28,18 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// GetWeatherByCity invokes GetWeatherByCity operation.
+	// CreatePlan invokes CreatePlan operation.
 	//
-	// Get weather data for a city.
+	// Создать новый план.
 	//
-	// GET /api/v1/weather/{city}
-	GetWeatherByCity(ctx context.Context, params GetWeatherByCityParams) (GetWeatherByCityRes, error)
-	// UpdateWeatherByCity invokes UpdateWeatherByCity operation.
+	// POST /api/v1/plan/{plan_id}
+	CreatePlan(ctx context.Context, request *CreatePlanRequest, params CreatePlanParams) (CreatePlanRes, error)
+	// GetPlanByID invokes GetPlanByID operation.
 	//
-	// Update or create weather data for a city.
+	// Получить план по идентификатору.
 	//
-	// PUT /api/v1/weather/{city}
-	UpdateWeatherByCity(ctx context.Context, request *UpdateWeatherRequest, params UpdateWeatherByCityParams) (UpdateWeatherByCityRes, error)
+	// GET /api/v1/plan/{plan_id}
+	GetPlanByID(ctx context.Context, params GetPlanByIDParams) (GetPlanByIDRes, error)
 }
 
 // Client implements OAS client.
@@ -88,21 +89,21 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// GetWeatherByCity invokes GetWeatherByCity operation.
+// CreatePlan invokes CreatePlan operation.
 //
-// Get weather data for a city.
+// Создать новый план.
 //
-// GET /api/v1/weather/{city}
-func (c *Client) GetWeatherByCity(ctx context.Context, params GetWeatherByCityParams) (GetWeatherByCityRes, error) {
-	res, err := c.sendGetWeatherByCity(ctx, params)
+// POST /api/v1/plan/{plan_id}
+func (c *Client) CreatePlan(ctx context.Context, request *CreatePlanRequest, params CreatePlanParams) (CreatePlanRes, error) {
+	res, err := c.sendCreatePlan(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendGetWeatherByCity(ctx context.Context, params GetWeatherByCityParams) (res GetWeatherByCityRes, err error) {
+func (c *Client) sendCreatePlan(ctx context.Context, request *CreatePlanRequest, params CreatePlanParams) (res CreatePlanRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("GetWeatherByCity"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/api/v1/weather/{city}"),
+		otelogen.OperationID("CreatePlan"),
+		semconv.HTTPRequestMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/api/v1/plan/{plan_id}"),
 	}
 
 	// Run stopwatch.
@@ -117,7 +118,7 @@ func (c *Client) sendGetWeatherByCity(ctx context.Context, params GetWeatherByCi
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, GetWeatherByCityOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, CreatePlanOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -135,16 +136,109 @@ func (c *Client) sendGetWeatherByCity(ctx context.Context, params GetWeatherByCi
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/api/v1/weather/"
+	pathParts[0] = "/api/v1/plan/"
 	{
-		// Encode "city" parameter.
+		// Encode "plan_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "city",
+			Param:   "plan_id",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.City))
+			return e.EncodeValue(conv.Int64ToString(params.PlanID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreatePlanRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreatePlanResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetPlanByID invokes GetPlanByID operation.
+//
+// Получить план по идентификатору.
+//
+// GET /api/v1/plan/{plan_id}
+func (c *Client) GetPlanByID(ctx context.Context, params GetPlanByIDParams) (GetPlanByIDRes, error) {
+	res, err := c.sendGetPlanByID(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPlanByID(ctx context.Context, params GetPlanByIDParams) (res GetPlanByIDRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("GetPlanByID"),
+		semconv.HTTPRequestMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/api/v1/plan/{plan_id}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, GetPlanByIDOperation,
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v1/plan/"
+	{
+		// Encode "plan_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "plan_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.Int64ToString(params.PlanID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -170,100 +264,7 @@ func (c *Client) sendGetWeatherByCity(ctx context.Context, params GetWeatherByCi
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetWeatherByCityResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// UpdateWeatherByCity invokes UpdateWeatherByCity operation.
-//
-// Update or create weather data for a city.
-//
-// PUT /api/v1/weather/{city}
-func (c *Client) UpdateWeatherByCity(ctx context.Context, request *UpdateWeatherRequest, params UpdateWeatherByCityParams) (UpdateWeatherByCityRes, error) {
-	res, err := c.sendUpdateWeatherByCity(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendUpdateWeatherByCity(ctx context.Context, request *UpdateWeatherRequest, params UpdateWeatherByCityParams) (res UpdateWeatherByCityRes, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("UpdateWeatherByCity"),
-		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/api/v1/weather/{city}"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, UpdateWeatherByCityOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/api/v1/weather/"
-	{
-		// Encode "city" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "city",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.City))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeUpdateWeatherByCityRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeUpdateWeatherByCityResponse(resp)
+	result, err := decodeGetPlanByIDResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

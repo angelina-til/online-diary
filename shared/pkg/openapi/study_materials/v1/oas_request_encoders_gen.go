@@ -7,11 +7,12 @@ import (
 	"net/http"
 
 	"github.com/go-faster/jx"
+
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeUpdateWeatherByCityRequest(
-	req *UpdateWeatherRequest,
+func encodeCreatePlanRequest(
+	req *CreatePlanRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

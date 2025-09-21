@@ -8,18 +8,18 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// GetWeatherByCity implements GetWeatherByCity operation.
+	// CreatePlan implements CreatePlan operation.
 	//
-	// Get weather data for a city.
+	// Создать новый план.
 	//
-	// GET /api/v1/weather/{city}
-	GetWeatherByCity(ctx context.Context, params GetWeatherByCityParams) (GetWeatherByCityRes, error)
-	// UpdateWeatherByCity implements UpdateWeatherByCity operation.
+	// POST /api/v1/plan/{plan_id}
+	CreatePlan(ctx context.Context, req *CreatePlanRequest, params CreatePlanParams) (CreatePlanRes, error)
+	// GetPlanByID implements GetPlanByID operation.
 	//
-	// Update or create weather data for a city.
+	// Получить план по идентификатору.
 	//
-	// PUT /api/v1/weather/{city}
-	UpdateWeatherByCity(ctx context.Context, req *UpdateWeatherRequest, params UpdateWeatherByCityParams) (UpdateWeatherByCityRes, error)
+	// GET /api/v1/plan/{plan_id}
+	GetPlanByID(ctx context.Context, params GetPlanByIDParams) (GetPlanByIDRes, error)
 	// NewError creates *GenericErrorStatusCode from error returned by handler.
 	//
 	// Used for common default response.

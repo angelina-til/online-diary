@@ -1,0 +1,33 @@
+type: object
+required:
+  - title
+  - created_at
+  - file_path
+properties:
+  id:
+    type: integer
+    format: int64
+    description: Идентификатор файла
+  title:
+    type: string
+    description: Название файла
+    minLength: 1
+    maxLength: 255
+  created_at:
+    type: string
+    format: date-time
+    description: Время создания файла
+    example: "2023-05-15T10:30:00Z"
+  updated_at:
+    type: string
+    format: date-time
+    description: Время последнего обновления файла
+    example: "2023-05-15T10:30:00Z"
+  file_url:
+    type: string
+    minLength: 1
+    description: URL для скачивания файла
+  file_size:
+    type: integer
+    format: int64
+    description: Размер файла в байтах

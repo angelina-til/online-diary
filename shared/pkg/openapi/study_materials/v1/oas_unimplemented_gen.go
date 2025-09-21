@@ -13,21 +13,21 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// GetWeatherByCity implements GetWeatherByCity operation.
+// CreatePlan implements CreatePlan operation.
 //
-// Get weather data for a city.
+// Создать новый план.
 //
-// GET /api/v1/weather/{city}
-func (UnimplementedHandler) GetWeatherByCity(ctx context.Context, params GetWeatherByCityParams) (r GetWeatherByCityRes, _ error) {
+// POST /api/v1/plan/{plan_id}
+func (UnimplementedHandler) CreatePlan(ctx context.Context, req *CreatePlanRequest, params CreatePlanParams) (r CreatePlanRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
-// UpdateWeatherByCity implements UpdateWeatherByCity operation.
+// GetPlanByID implements GetPlanByID operation.
 //
-// Update or create weather data for a city.
+// Получить план по идентификатору.
 //
-// PUT /api/v1/weather/{city}
-func (UnimplementedHandler) UpdateWeatherByCity(ctx context.Context, req *UpdateWeatherRequest, params UpdateWeatherByCityParams) (r UpdateWeatherByCityRes, _ error) {
+// GET /api/v1/plan/{plan_id}
+func (UnimplementedHandler) GetPlanByID(ctx context.Context, params GetPlanByIDParams) (r GetPlanByIDRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

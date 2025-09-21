@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
+
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -14,26 +15,25 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// GetWeatherByCityParams is parameters of GetWeatherByCity operation.
-type GetWeatherByCityParams struct {
-	// Название города, для которого запрашиваются или
-	// обновляются данные о погоде.
-	City string
+// CreatePlanParams is parameters of CreatePlan operation.
+type CreatePlanParams struct {
+	// Идентификатор плана.
+	PlanID int64
 }
 
-func unpackGetWeatherByCityParams(packed middleware.Parameters) (params GetWeatherByCityParams) {
+func unpackCreatePlanParams(packed middleware.Parameters) (params CreatePlanParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "city",
+			Name: "plan_id",
 			In:   "path",
 		}
-		params.City = packed[key].(string)
+		params.PlanID = packed[key].(int64)
 	}
 	return params
 }
 
-func decodeGetWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Request) (params GetWeatherByCityParams, _ error) {
-	// Decode path: city.
+func decodeCreatePlanParams(args [1]string, argsEscaped bool, r *http.Request) (params CreatePlanParams, _ error) {
+	// Decode path: plan_id.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -45,7 +45,7 @@ func decodeGetWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Requ
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "city",
+				Param:   "plan_id",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -57,27 +57,28 @@ func decodeGetWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Requ
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
 
-				params.City = c
+				params.PlanID = c
 				return nil
 			}(); err != nil {
 				return err
 			}
 			if err := func() error {
-				if err := (validate.String{
-					MinLength:    1,
-					MinLengthSet: true,
-					MaxLength:    100,
-					MaxLengthSet: true,
-					Email:        false,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(params.City)); err != nil {
-					return errors.Wrap(err, "string")
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           1,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.PlanID)); err != nil {
+					return errors.Wrap(err, "int")
 				}
 				return nil
 			}(); err != nil {
@@ -89,7 +90,7 @@ func decodeGetWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Requ
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "city",
+			Name: "plan_id",
 			In:   "path",
 			Err:  err,
 		}
@@ -97,26 +98,25 @@ func decodeGetWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Requ
 	return params, nil
 }
 
-// UpdateWeatherByCityParams is parameters of UpdateWeatherByCity operation.
-type UpdateWeatherByCityParams struct {
-	// Название города, для которого запрашиваются или
-	// обновляются данные о погоде.
-	City string
+// GetPlanByIDParams is parameters of GetPlanByID operation.
+type GetPlanByIDParams struct {
+	// Идентификатор плана.
+	PlanID int64
 }
 
-func unpackUpdateWeatherByCityParams(packed middleware.Parameters) (params UpdateWeatherByCityParams) {
+func unpackGetPlanByIDParams(packed middleware.Parameters) (params GetPlanByIDParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "city",
+			Name: "plan_id",
 			In:   "path",
 		}
-		params.City = packed[key].(string)
+		params.PlanID = packed[key].(int64)
 	}
 	return params
 }
 
-func decodeUpdateWeatherByCityParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateWeatherByCityParams, _ error) {
-	// Decode path: city.
+func decodeGetPlanByIDParams(args [1]string, argsEscaped bool, r *http.Request) (params GetPlanByIDParams, _ error) {
+	// Decode path: plan_id.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -128,7 +128,7 @@ func decodeUpdateWeatherByCityParams(args [1]string, argsEscaped bool, r *http.R
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "city",
+				Param:   "plan_id",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
@@ -140,27 +140,28 @@ func decodeUpdateWeatherByCityParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
 
-				params.City = c
+				params.PlanID = c
 				return nil
 			}(); err != nil {
 				return err
 			}
 			if err := func() error {
-				if err := (validate.String{
-					MinLength:    1,
-					MinLengthSet: true,
-					MaxLength:    100,
-					MaxLengthSet: true,
-					Email:        false,
-					Hostname:     false,
-					Regex:        nil,
-				}).Validate(string(params.City)); err != nil {
-					return errors.Wrap(err, "string")
+				if err := (validate.Int{
+					MinSet:        true,
+					Min:           1,
+					MaxSet:        false,
+					Max:           0,
+					MinExclusive:  false,
+					MaxExclusive:  false,
+					MultipleOfSet: false,
+					MultipleOf:    0,
+				}).Validate(int64(params.PlanID)); err != nil {
+					return errors.Wrap(err, "int")
 				}
 				return nil
 			}(); err != nil {
@@ -172,7 +173,7 @@ func decodeUpdateWeatherByCityParams(args [1]string, argsEscaped bool, r *http.R
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "city",
+			Name: "plan_id",
 			In:   "path",
 			Err:  err,
 		}

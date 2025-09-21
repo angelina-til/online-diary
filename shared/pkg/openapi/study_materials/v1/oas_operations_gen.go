@@ -6,6 +6,6 @@ package study_materials_v1
 type OperationName = string
 
 const (
-	GetWeatherByCityOperation    OperationName = "GetWeatherByCity"
-	UpdateWeatherByCityOperation OperationName = "UpdateWeatherByCity"
+	CreatePlanOperation  OperationName = "CreatePlan"
+	GetPlanByIDOperation OperationName = "GetPlanByID"
 )
