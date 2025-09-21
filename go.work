@@ -1,0 +1,9 @@
+go 1.25.1
+
+use (
+	./attendance
+	./performance
+	./shared
+	./user_profile
+	./study_materials
+)
