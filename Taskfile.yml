@@ -27,12 +27,12 @@ vars:
   NODE_MODULES_DIR: '{{.ROOT_DIR}}/node_modules/.bin'
   REDOCLY: '{{.NODE_MODULES_DIR}}/redocly'
 
-  OPEN_API_ORDER_V1_BASE: '{{.ROOT_DIR}}/shared/api/order/v1/order.openapi.yaml'
-  OPEN_API_ORDER_V1_BUNDLE: '{{.ROOT_DIR}}/shared/api/bundles/order.openapi.v1.bundle.yaml'
+  OPEN_API_USER_PROFILE_V1_BASE: '{{.ROOT_DIR}}/shared/api/user_profile/v1/user_profile.openapi.yaml'
+  OPEN_API_USER_PROFILE_V1_BUNDLE: '{{.ROOT_DIR}}/shared/api/bundles/user_profile.openapi.v1.bundle.yaml'
 
   OPEN_API_FILES: '{{.ROOT_DIR}}/shared/api/bundles'
 
-  MODULES: assembly inventory order payment platform iam notification
+  MODULES: attendance performance shared study_materials user_profile
 
 tasks:
   install-formatters:
@@ -181,17 +181,17 @@ tasks:
           npm ci
         }
 
-  redocly-cli:order-v1-bundle:
+  redocly-cli:user-profile-v1-bundle:
     desc: Собрать OpenAPI в один файл через локальный redocly
     deps: [ redocly-cli:install ]
     cmds:
-      - '{{.REDOCLY}} bundle {{.OPEN_API_ORDER_V1_BASE}} -o {{.OPEN_API_ORDER_V1_BUNDLE}}'
+      - '{{.REDOCLY}} bundle {{.OPEN_API_USER_PROFILE_V1_BASE}} -o {{.OPEN_API_USER_PROFILE_V1_BUNDLE}}'
 
   redocly-cli:bundle:
     desc: Собрать все схемы OpenAPI в общие файлы через локальный redocly
     deps: [ redocly-cli:install ]
     cmds:
-      - task: redocly-cli:order-v1-bundle
+      - task: redocly-cli:user-profile-v1-bundle
 
   ogen:install:
     desc: "Скачивает ogen в папку bin"
