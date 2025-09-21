@@ -49,15 +49,15 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/api/v1/weather/"
+		case '/': // Prefix: "/api/v1/plan/"
 
-			if l := len("/api/v1/weather/"); len(elem) >= l && elem[0:l] == "/api/v1/weather/" {
+			if l := len("/api/v1/plan/"); len(elem) >= l && elem[0:l] == "/api/v1/plan/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
-			// Param: "city"
+			// Param: "plan_id"
 			// Leaf parameter, slashes are prohibited
 			idx := strings.IndexByte(elem, '/')
 			if idx >= 0 {
@@ -70,19 +70,20 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				// Leaf node.
 				switch r.Method {
 				case "GET":
-					s.handleGetWeatherByCityRequest([1]string{
+					s.handleGetPlanByIDRequest([1]string{
 						args[0],
 					}, elemIsEscaped, w, r)
-				case "PUT":
-					s.handleUpdateWeatherByCityRequest([1]string{
+				case "POST":
+					s.handleCreatePlanRequest([1]string{
 						args[0],
 					}, elemIsEscaped, w, r)
 				default:
-					s.notAllowed(w, r, "GET,PUT")
+					s.notAllowed(w, r, "GET,POST")
 				}
 
 				return
 			}
+
 		}
 	}
 	s.notFound(w, r)
@@ -163,15 +164,15 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/api/v1/weather/"
+		case '/': // Prefix: "/api/v1/plan/"
 
-			if l := len("/api/v1/weather/"); len(elem) >= l && elem[0:l] == "/api/v1/weather/" {
+			if l := len("/api/v1/plan/"); len(elem) >= l && elem[0:l] == "/api/v1/plan/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
-			// Param: "city"
+			// Param: "plan_id"
 			// Leaf parameter, slashes are prohibited
 			idx := strings.IndexByte(elem, '/')
 			if idx >= 0 {
@@ -184,18 +185,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				// Leaf node.
 				switch method {
 				case "GET":
-					r.name = GetWeatherByCityOperation
-					r.summary = "Get weather data for a city"
-					r.operationID = "GetWeatherByCity"
-					r.pathPattern = "/api/v1/weather/{city}"
+					r.name = GetPlanByIDOperation
+					r.summary = "Получить план по идентификатору"
+					r.operationID = "GetPlanByID"
+					r.pathPattern = "/api/v1/plan/{plan_id}"
 					r.args = args
 					r.count = 1
 					return r, true
-				case "PUT":
-					r.name = UpdateWeatherByCityOperation
-					r.summary = "Update or create weather data for a city"
-					r.operationID = "UpdateWeatherByCity"
-					r.pathPattern = "/api/v1/weather/{city}"
+				case "POST":
+					r.name = CreatePlanOperation
+					r.summary = "Создать новый план"
+					r.operationID = "CreatePlan"
+					r.pathPattern = "/api/v1/plan/{plan_id}"
 					r.args = args
 					r.count = 1
 					return r, true
@@ -203,6 +204,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					return
 				}
 			}
+
 		}
 	}
 	return r, false

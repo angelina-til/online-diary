@@ -13,5 +13,5 @@ tags:
     description: Операции с данными о погоде — получение и обновление информации
 
 paths:
-  /api/v1/weather/{city}:
-    $ref: ./paths/weather_by_city.yaml
+  /api/v1/plan/{plan_id}:
+    $ref: ./paths/plan.yaml

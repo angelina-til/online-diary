@@ -1,0 +1,9 @@
+name: plan_id
+in: path
+required: true
+description: Идентификатор плана
+schema:
+  type: integer
+  format: int64
+  minimum: 1
+  example: 15

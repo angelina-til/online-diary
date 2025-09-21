@@ -1,0 +1,14 @@
+type: object
+required:
+  - title
+  - file_url
+properties:
+  title:
+    type: string
+    description: Название файла
+    minLength: 1
+    maxLength: 255
+  file_url:
+    type: string
+    minLength: 1
+    description: URL для скачивания файла

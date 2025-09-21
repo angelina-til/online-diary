@@ -24,9 +24,9 @@ const (
 )
 
 func main() {
-	storage := NewUserProfileStorage()
+	storage := NewStudyPlanStorage()
 
-	handler := GetUserProfileHandler(storage)
+	handler := GetStudyPlanHandler(storage)
 
 	userProfileServer, err := openAPI.NewServer(handler)
 	if err != nil {

@@ -9,12 +9,13 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeUpdateWeatherByCityRequest(r *http.Request) (
-	req *UpdateWeatherRequest,
+func (s *Server) decodeCreatePlanRequest(r *http.Request) (
+	req *CreatePlanRequest,
 	close func() error,
 	rerr error,
 ) {
@@ -53,7 +54,7 @@ func (s *Server) decodeUpdateWeatherByCityRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request UpdateWeatherRequest
+		var request CreatePlanRequest
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
